@@ -1,32 +1,24 @@
 # parent docker image name, contains tools that simplify docker container operations
 FROM phusion/baseimage
-
 # label maintainer will specify your email, others developers will know who created the image
 LABEL maintainer="liliana.carvalho.pt@gmail.com"
-
 # initiates house-keeping tasks provided by phusion/baseimage
 CMD ["/sbin/my_init"]
-
 # following 3 lines will install the latest stable nginx version
 RUN apt-get update && apt-get install -y python-software-properties
 RUN add-apt-repository ppa:nginx/stable
 RUN apt-get update && apt-get install -y nginx
-
 # set nginx configuration to not run in daemon mode
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-
 # symlink the nginx access and error log files to the container standard. 
 # this way we will never persist information on the container
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
-
 # copu start.sh to the container
 RUN mkdir -p /etc/service/nginx
 ADD start.sh /etc/service/nginx/run
 RUN chmod +x /etc/service/nginx/run
-
 # tells docker to expose port 80 on all containers instantiated from this image
 EXPOSE 80
-
 # provides final house-keeping tasks 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
